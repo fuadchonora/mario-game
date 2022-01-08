@@ -1,15 +1,17 @@
+import ImgPlatfrom from '/img/platform.png';
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 const offsetWidth = 400;
-const canvasWidth = innerWidth - 10;
-const canvasHeight = innerHeight - 10;
+const canvasWidth = innerWidth;
+const canvasHeight = canvasWidth / 2;
 
 canvas.width = canvasWidth;
 canvas.height = canvasHeight;
 
-const gravity = 0.5;
-const moveVelociy = 4;
+const gravity = 1;
+const moveVelociy = 8;
 const keys = {
 	left: { pressed: false },
 	right: { pressed: false },
@@ -22,6 +24,7 @@ class Player {
 		this.velocity = { x: 0, y: 0 };
 		this.width = 30;
 		this.height = 30;
+		this.scrollOffset = 0;
 	}
 
 	draw() {
@@ -44,28 +47,40 @@ class Player {
 		else {
 			this.velocity.x = 0;
 			platforms.map((platform) => {
-				if (keys.left.pressed) platform.position.x += moveVelociy;
-				if (keys.right.pressed) platform.position.x -= moveVelociy;
+				if (keys.left.pressed) {
+					this.scrollOffset -= moveVelociy;
+					platform.position.x += moveVelociy;
+				}
+				if (keys.right.pressed) {
+					this.scrollOffset += moveVelociy;
+					platform.position.x -= moveVelociy;
+				}
 			});
 		}
 	}
 }
 
 class Platform {
-	constructor(x, y) {
+	constructor(x, y, image) {
 		this.position = { x, y };
-		this.width = 200;
-		this.height = 20;
+		this.image = image;
+		this.width = 400;
+		this.height = 100;
 	}
 
 	draw() {
-		ctx.fillStyle = '#000';
-		ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+		ctx.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
 	}
 }
 
+const image = new Image();
+image.src = ImgPlatfrom;
+
 const player = new Player();
-const platforms = [new Platform(300, canvasHeight - 200), new Platform(700, canvasHeight - 250)];
+const platforms = [
+	new Platform(-1, canvasHeight - 100, image),
+	new Platform(400 - 3, canvasHeight - 100, image),
+];
 
 function animate() {
 	requestAnimationFrame(animate);
