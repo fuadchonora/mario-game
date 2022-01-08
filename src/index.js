@@ -1,4 +1,6 @@
 import ImgPlatfrom from '/img/platform.png';
+import ImgHills from '/img/hills.png';
+import ImgBackground from '/img/background.jpeg';
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -7,11 +9,17 @@ const offsetWidth = 400;
 const canvasWidth = innerWidth;
 const canvasHeight = canvasWidth / 2;
 
+const platformWidth = 400;
+const platformHeight = 100;
+const platformX = 0;
+const platformY = canvasHeight - 100;
+
 canvas.width = canvasWidth;
 canvas.height = canvasHeight;
 
 const gravity = 1;
 const moveVelociy = 8;
+const backgroundVelocity = 4;
 const keys = {
 	left: { pressed: false },
 	right: { pressed: false },
@@ -46,16 +54,17 @@ class Player {
 		else if (keys.right.pressed && this.position.x < canvasWidth - offsetWidth) this.velocity.x = moveVelociy;
 		else {
 			this.velocity.x = 0;
-			platforms.map((platform) => {
-				if (keys.left.pressed) {
-					this.scrollOffset -= moveVelociy;
-					platform.position.x += moveVelociy;
-				}
-				if (keys.right.pressed) {
-					this.scrollOffset += moveVelociy;
-					platform.position.x -= moveVelociy;
-				}
-			});
+
+			if (keys.left.pressed) {
+				this.scrollOffset -= moveVelociy;
+				platforms.map((platform) => (platform.position.x += moveVelociy));
+				genericObjects.map((genericObject) => (genericObject.position.x += backgroundVelocity));
+			}
+			if (keys.right.pressed) {
+				this.scrollOffset += moveVelociy;
+				platforms.map((platform) => (platform.position.x -= moveVelociy));
+				genericObjects.map((genericObject) => (genericObject.position.x -= backgroundVelocity));
+			}
 		}
 	}
 }
@@ -64,8 +73,8 @@ class Platform {
 	constructor(x, y, image) {
 		this.position = { x, y };
 		this.image = image;
-		this.width = 400;
-		this.height = 100;
+		this.width = platformWidth;
+		this.height = platformHeight;
 	}
 
 	draw() {
@@ -73,18 +82,43 @@ class Platform {
 	}
 }
 
-const image = new Image();
-image.src = ImgPlatfrom;
+class GenericObject {
+	constructor(x, y, width, height, image) {
+		this.position = { x, y };
+		this.image = image;
+		this.width = width;
+		this.height = height;
+	}
+
+	draw() {
+		ctx.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+	}
+}
+
+function createImage(src) {
+	const image = new Image();
+	image.src = src;
+	return image;
+}
+
+const platformImage = createImage(ImgPlatfrom);
+const hillsImage = createImage(ImgHills);
+const backgroundImage = createImage(ImgBackground);
 
 const player = new Player();
 const platforms = [
-	new Platform(-1, canvasHeight - 100, image),
-	new Platform(400 - 3, canvasHeight - 100, image),
+	new Platform(platformX - 1, platformY, platformImage),
+	new Platform(platformX + platformWidth - 3, platformY, platformImage),
+];
+const genericObjects = [
+	new GenericObject(0, 0, canvasWidth, canvasHeight, backgroundImage),
+	new GenericObject(0, canvasHeight - 190, canvasWidth, 100, hillsImage),
 ];
 
 function animate() {
 	requestAnimationFrame(animate);
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	genericObjects.map((genericObject) => genericObject.draw());
 	platforms.map((platform) => platform.draw());
 	player.update();
 
