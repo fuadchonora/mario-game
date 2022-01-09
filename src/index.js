@@ -47,7 +47,7 @@ class Player {
 		this.position.y += this.velocity.y;
 
 		if (this.position.y + this.height + this.velocity.y <= canvasHeight) this.velocity.y += gravity;
-		else this.velocity.y = 0;
+		// else this.velocity.y = 0;
 
 		if (keys.left.pressed && keys.right.pressed) this.velocity.x = 0;
 		else if (keys.left.pressed && this.position.x > offsetWidth) this.velocity.x = -moveVelociy;
@@ -65,6 +65,18 @@ class Player {
 				platforms.map((platform) => (platform.position.x -= moveVelociy));
 				genericObjects.map((genericObject) => (genericObject.position.x -= backgroundVelocity));
 			}
+		}
+
+		//Win Condition
+		if (this.scrollOffset >= 5000) {
+			alert('You Win!');
+			init();
+		}
+
+		//Lose Condition
+		if (this.position.y > canvasHeight) {
+			alert('You Lose!');
+			init();
 		}
 	}
 }
@@ -105,15 +117,27 @@ const platformImage = createImage(ImgPlatfrom);
 const hillsImage = createImage(ImgHills);
 const backgroundImage = createImage(ImgBackground);
 
-const player = new Player();
-const platforms = [
-	new Platform(platformX - 1, platformY, platformImage),
-	new Platform(platformX + platformWidth - 3, platformY, platformImage),
-];
-const genericObjects = [
-	new GenericObject(0, 0, canvasWidth, canvasHeight, backgroundImage),
-	new GenericObject(0, canvasHeight - 190, canvasWidth, 100, hillsImage),
-];
+let player;
+let platforms;
+let genericObjects;
+
+function init() {
+	keys.left.pressed = false;
+	keys.right.pressed = false;
+	keys.space.pressed = false;
+
+	player = new Player();
+	platforms = [];
+	genericObjects = [];
+
+	platforms.push(new Platform(-1, platformY, platformImage));
+	platforms.push(new Platform((platformWidth - 3) * 1, platformY, platformImage));
+	platforms.push(new Platform((platformWidth - 3 + 100) * 2, platformY, platformImage));
+	platforms.push(new Platform((platformWidth - 3 + 150) * 3, platformY, platformImage));
+	d;
+	genericObjects.push(new GenericObject(0, 0, canvasWidth, canvasHeight, backgroundImage));
+	genericObjects.push(new GenericObject(0, canvasHeight - 190, canvasWidth, 100, hillsImage));
+}
 
 function animate() {
 	requestAnimationFrame(animate);
@@ -137,6 +161,7 @@ function animate() {
 	});
 }
 
+init();
 animate();
 
 addEventListener('keydown', ({ code }) => {
